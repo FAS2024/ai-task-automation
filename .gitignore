@@ -10,8 +10,11 @@ __pycache__/
 .ruff_cache/
 
 # Env files
+.env
+.env.*
 backend/.env
-backend/.venv
+backend/.env.*
+backend/.venv/
 backend/env.sample.txt~
 
 # OS/IDE
