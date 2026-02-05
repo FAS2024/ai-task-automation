@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      ENV_FILE: none
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,4 +26,5 @@ jobs:
       - name: Tests
         run: |
           cd backend
+          export ENV_FILE=none
           pytest --cov=app --cov-report=term-missing
