@@ -1,0 +1,45 @@
+services:
+  redis:
+    image: redis:7.2
+    ports:
+      - "6379:6379"
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: automation
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5432:5432"
+  api:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      REDIS_URL: redis://redis:6379/0
+      CELERY_EAGER: "false"
+      DATABASE_URL: postgresql+psycopg2://app:app@db:5432/automation
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - db
+  worker:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      REDIS_URL: redis://redis:6379/0
+      CELERY_EAGER: "false"
+      DATABASE_URL: postgresql+psycopg2://app:app@db:5432/automation
+      RUN_MIGRATIONS: "false"
+    command: ["celery", "-A", "app.tasks.celery_app", "worker", "--loglevel=info"]
+    depends_on:
+      - redis
+      - db
