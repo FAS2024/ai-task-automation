@@ -11,6 +11,7 @@ __pycache__/
 
 # Env files
 backend/.env
+backend/.venv
 backend/env.sample.txt~
 
 # OS/IDE
@@ -22,5 +23,3 @@ Thumbs.db
 # Logs
 *.log
 
-# Local artifacts
-backend/websocat.exe
