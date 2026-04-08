@@ -1,8 +1,16 @@
 from uuid import uuid4
 
-from celery.result import AsyncResult
-from fastapi import APIRouter, Depends, HTTPException, Request, WebSocket, WebSocketDisconnect, status
 import redis.asyncio as redis
+from celery.result import AsyncResult
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+    status,
+)
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 

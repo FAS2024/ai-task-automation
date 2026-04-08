@@ -10,14 +10,13 @@ from pythonjsonlogger import jsonlogger
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from starlette.responses import Response
 
 from app.api.routes import router
 from app.core.config import get_settings
 from app.core.limiter import limiter
 from app.core.security import hash_password
-from sqlalchemy.dialects.postgresql import insert as pg_insert
-
 from app.db import SessionLocal
 from app.models import User
 

@@ -3,6 +3,8 @@
 Thanks for your interest in contributing. This project is built as a production‑ready
 portfolio example; the guidelines below keep the codebase consistent and reliable.
 
+Use Python **3.12** (see `backend/.python-version`).
+
 ## Workflow
 - Create a feature branch from `main`
 - Keep changes focused and small

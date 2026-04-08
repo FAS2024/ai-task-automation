@@ -5,6 +5,7 @@ __pycache__/
 *.pyd
 .Python
 .venv/
+.ci-venv/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -15,6 +16,7 @@ __pycache__/
 backend/.env
 backend/.env.*
 backend/.venv/
+backend/.venv-ci/
 backend/env.sample.txt~
 
 # OS/IDE

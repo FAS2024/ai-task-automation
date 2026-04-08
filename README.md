@@ -3,9 +3,9 @@
 [![CI](https://github.com/FAS2024/ai-task-automation/actions/workflows/ci.yml/badge.svg)](https://github.com/FAS2024/ai-task-automation/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-API-first automation platform built to demonstrate production-grade backend
-engineering: async workflows, evented updates, strong API contracts, and
-operational readiness.
+Backend for a multi-tenant style automation API: clients submit work, Celery runs it, optional Redis pushes updates over WebSockets. I use it as a portfolio piece for backend and platform roles.
+
+**Stack:** Python 3.12 · `main` is linted and tested in GitHub Actions (Ruff + pytest with coverage).
 
 Repo: `https://github.com/FAS2024/ai-task-automation`
 
@@ -34,15 +34,11 @@ pytest
 ```
 
 ## Highlights
-- Async task processing with Celery
-- WebSocket updates via Redis pubsub
-- GPT-4 integration with mock fallback when no API key
-- Postgres persistence + Alembic migrations
-- Production-ready layout and configuration
-- CI pipeline with linting and tests
-- Readiness endpoint and request tracing
-- JWT auth + RBAC, Postgres persistence, rate limiting, tracing
-- Architecture diagram and Postman collection
+- Celery workers, Redis as broker; WebSocket channel when Redis is up
+- JWT auth, role-based admin routes, SlowAPI rate limits
+- Postgres + Alembic; Docker Compose for api, worker, db, redis
+- OpenAPI at `/docs` and `/openapi.json`; Postman under `docs/`
+- JSON logs, `X-Request-ID`, optional OTLP tracing
 
 ## Why this project
 This project models a real automation platform where multiple clients submit
@@ -84,7 +80,7 @@ celery -A app.tasks.celery_app worker --loglevel=info
 ```
 
 API: `http://localhost:8000/api/v1`  
-Docs: `http://localhost:8000/docs`
+Docs: `http://localhost:8000/docs` · OpenAPI JSON: `http://localhost:8000/openapi.json`
 
 ## Production-like run (Docker)
 ```bash
@@ -126,10 +122,8 @@ curl http://localhost:8000/api/v1/tasks/<task_id> ^
   -H "Authorization: Bearer <token>"
 ```
 
-WebSocket updates:
-```
-ws://localhost:8000/api/v1/ws/updates
-```
+WebSocket (needs Redis for live events; otherwise the server sends a single `noop` message):
+`ws://localhost:8000/api/v1/ws/updates`
 
 ## Health & readiness
 - `GET /api/v1/health` (basic status)
@@ -140,12 +134,6 @@ Set these in `backend/.env` to auto-create an admin on startup:
 ```
 INITIAL_ADMIN_EMAIL=admin@example.com
 INITIAL_ADMIN_PASSWORD=ChangeMe123
-```
-
-## WebSocket updates
-Use any WebSocket client (e.g., `websocat`) and connect:
-```
-ws://localhost:8000/api/v1/ws/updates
 ```
 
 ## Production notes
@@ -180,7 +168,7 @@ cd backend
 .\scripts\seed.ps1
 ```
 
-## Security & production notes
+## Security (deploying for real)
 - Change `JWT_SECRET_KEY` and initial admin credentials before deployment.
 - Use a managed Postgres and Redis in production.
 - Set strict `CORS_ORIGINS` for your front-end domain.
@@ -194,11 +182,10 @@ cd backend
 - If Docker images won’t build, restart Docker Desktop and retry.
 - To reset the database: `docker compose down -v` (destroys data).
 
-## What to highlight in interviews
-- Designed async workflows with delivery guarantees using Celery + Redis.
-- Built a clean auth model with JWT + RBAC and protected endpoints.
-- Added operational readiness: migrations, health checks, and tracing hooks.
-- API-first design with strong schemas and a documented contract.
+## Interview angles
+- Split API and worker so timeouts and retries stay out of request threads.
+- Auth is JWT claims + DB user lookup; admin is a separate dependency.
+- Migrations and health checks are there so deploys are boring on purpose.
 
 ## Contributing & security
 - See `CONTRIBUTING.md` for dev workflow and quality checks.

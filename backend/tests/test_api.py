@@ -1,6 +1,9 @@
 from fastapi.testclient import TestClient
 
+from app.core.security import hash_password
+from app.db import SessionLocal
 from app.main import app
+from app.models import User
 
 
 def test_health():
@@ -67,3 +70,53 @@ def test_me_requires_auth():
     client = TestClient(app)
     response = client.get("/api/v1/me")
     assert response.status_code == 401
+
+
+def test_ready_without_redis_reports_null():
+    client = TestClient(app)
+    r = client.get("/api/v1/health/ready")
+    assert r.status_code == 200
+    assert r.json()["status"] == "ready"
+    assert r.json()["redis"] is None
+
+
+def test_admin_routes_require_admin_role():
+    client = TestClient(app)
+    token = register_and_get_token(client)
+    r = client.get(
+        "/api/v1/admin/task-runs",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert r.status_code == 403
+
+
+def test_admin_can_list_task_runs():
+    db = SessionLocal()
+    db.add(
+        User(
+            email="ops-admin@example.com",
+            hashed_password=hash_password("AdminPass123"),
+            role="admin",
+        )
+    )
+    db.commit()
+    db.close()
+
+    client = TestClient(app)
+    login = client.post(
+        "/api/v1/auth/token",
+        data={"username": "ops-admin@example.com", "password": "AdminPass123"},
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]
+
+    listed = client.get(
+        "/api/v1/admin/task-runs",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert listed.status_code == 200
+    body = listed.json()
+    assert isinstance(body, list)
+    for row in body:
+        assert "task_id" in row
+        assert "client_id" in row

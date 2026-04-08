@@ -22,6 +22,9 @@ def env_setup(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("REDIS_URL", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     get_settings.cache_clear()
+    from app.main import app
+
+    app.state.limiter.reset()
     from app.db import Base, engine
 
     Base.metadata.create_all(bind=engine)
