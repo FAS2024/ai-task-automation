@@ -17,6 +17,7 @@ backend/.env
 backend/.env.*
 backend/.venv/
 backend/.venv-ci/
+backend/.venv-lc/
 backend/env.sample.txt~
 
 # OS/IDE
